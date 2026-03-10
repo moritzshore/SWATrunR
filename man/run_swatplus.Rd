@@ -22,6 +22,7 @@ run_swatplus(
   add_date = TRUE,
   split_units = TRUE,
   run_in_project = FALSE,
+  use_existing_cal = FALSE,
   refresh = TRUE,
   keep_folder = FALSE,
   quiet = FALSE,
@@ -192,6 +193,15 @@ actual run time of a simulation will also kill all potentially successful
 runs before finishing.
 
 Default \code{time_out} is set to \code{Inf} to not kill any simulations.}
+
+\item{use_exiting_cal}{Should the simulation run use the calibration.cal
+file which is provided in the SWAT+ project folder? If \code{FALSE} (default)
+the simulation will be either run with the defined \code{parameter} set or
+without a calibration.cal. If \code{TRUE} then the calibration.cal which
+already exists in the project folder will be used.
+
+If both, \code{parameter} is defined and \code{use_existing_cal = TRUE} the simulation
+will not be run.}
 }
 \value{
 Returns the simulation results as list with the following elements:
