@@ -80,6 +80,8 @@
 #'
 #' @examples
 #'
+#' # TODO?
+#'
 #' @importFrom doSNOW registerDoSNOW
 #' @importFrom dplyr mutate %>%
 #' @importFrom foreach foreach %dopar%

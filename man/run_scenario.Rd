@@ -90,3 +90,8 @@ Simulations can e.g. be run in parallel by defining \code{n_thread}. For a full
 list of input arguments see the help pages of \code{\link{run_swatplus}} and
 \code{\link{run_swat2012}}.
 }
+\examples{
+
+# TODO?
+
+}
