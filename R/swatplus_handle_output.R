@@ -73,7 +73,7 @@ read_swatplus_output <- function(output, thread_path, split_units) {
       col_names <- output_pst %>%
         map(., ~ fread(thread_path%//%.x$file_full[1], skip = 1, nrows = 1, header = F)) %>%
         map(., ~ unlist(.x) %>% unname(.)) %>%
-        map2(., unit_names, ~ replace_colname_na(.x, .y)) %>%
+        map2(., unit_names, ~ SWATrunR::replace_colname_na(.x, .y)) %>%
         map(., ~ .x[!is.na(.x)]) %>%
         map(., ~add_suffix_to_duplicate(.x))
 
@@ -464,7 +464,7 @@ check_for_end_date <- function(model_output, end_date) {
                    rollforward(ymd(end_date)),
                    rollbackward(ymd(end_date)))
 
-  has_end_date <- rep(NA, length(model_output))
+  has_end_date <- rep(NA, length(model_output)) # maybe the source of the error is here because this should be 1 but its 2 when yield data is modelled?
 
   for (i in 1:length(model_output)) {
     out_i <- model_output[[i]]

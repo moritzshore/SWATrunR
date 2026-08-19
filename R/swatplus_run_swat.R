@@ -366,6 +366,36 @@ run_swatplus <- function(project_path, output, parameter = NULL,
                          quiet = FALSE, time_out = Inf) {
 
 #-------------------------------------------------------------------------------
+ if(FALSE) {
+    parameter = NULL
+    start_date = NULL
+    end_date = NULL
+    years_skip = NULL
+    start_date_print = NULL
+    run_index = NULL
+    run_path = NULL
+    n_thread = NULL
+    save_file = NULL
+    save_path = NULL
+    return_output = TRUE
+    add_parameter = TRUE
+    add_date = TRUE
+    split_units = TRUE
+    run_in_project = FALSE
+    use_existing_cal = FALSE
+    refresh = TRUE
+    keep_folder = FALSE
+    quiet = FALSE
+    time_out = Inf
+
+    project_path = "../../swat-skuterud-traditional/R/swat-skuterud-traditional/test_run/"
+    output = readr::read_rds("../../swat-skuterud-traditional/R/swat-skuterud-traditional/myoutputs.rds")
+    return_output = T
+    years_skip = 2
+    use_existing_cal = F
+    add_date = T
+    keep_folder = T
+}
 
   # Check input parameters for additional inputs
   # Not implemented currently, might be required if soft calibration is
@@ -477,7 +507,7 @@ run_swatplus <- function(project_path, output, parameter = NULL,
   n_thread <- min(max(nrow(parameter$values),1),
                   max(n_thread,1),
                   max(length(run_index),1),
-                  detectCores())
+                  parallel::detectCores())
 
   ## Identify operating system and find the SWAT executable in the project folder
   os <- get_os()
@@ -499,13 +529,13 @@ run_swatplus <- function(project_path, output, parameter = NULL,
   # Initiate foreach loop to run SWAT models
   ## make and register cluster, create table that links the parallel worker
   ## with the created parallel thread folders in '.model_run'
-  cl <- makeCluster(n_thread)
-  worker <- tibble(worker_id = parSapply(cl, 1:n_thread,
+  cl <- parallel::makeCluster(n_thread)
+  worker <- tibble(worker_id = parallel::parSapply(cl, 1:n_thread,
                                          function(x) paste(Sys.info()[['nodename']],
                                                            Sys.getpid(), sep = "-")),
                    thread_id = dir(run_path) %>% .[grepl("thread_",.)])
 
-  registerDoSNOW(cl)
+  doSNOW::registerDoSNOW(cl)
   #-------------------------------------------------------------------------------
   # Start parallel SWAT model execution with foreach
 
@@ -526,7 +556,7 @@ run_swatplus <- function(project_path, output, parameter = NULL,
   }
 #
   sim_result <- foreach(i_run = 1:n_run,
-   .packages = c("dplyr", "lubridate", "processx", "stringr"),
+   .packages = c("dplyr", "lubridate", "processx", "stringr", "purrr", "data.table", "SWATrunR"),
    .options.snow = opts) %dopar% {
     # for(i_run in 1:max(nrow(parameter), 1)) {
     if(run_in_project) {
@@ -551,7 +581,7 @@ run_swatplus <- function(project_path, output, parameter = NULL,
     }
 
     ## Execute the SWAT exe file located in the thread folder
-    msg <- run(run_os(swat_exe, os), wd = thread_path,
+    msg <- processx::run(run_os(swat_exe, os), wd = thread_path,
                error_on_status = FALSE, timeout = time_out)
 
     if(msg$timeout) {
